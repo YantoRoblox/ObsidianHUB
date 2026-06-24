@@ -6627,7 +6627,7 @@ function Library:CreateWindow(WindowInfo)
 
         SearchBox = New("TextBox", {
             BackgroundColor3 = "MainColor",
-            PlaceholderText = "Search",
+            PlaceholderText = "Search - VDT library",
             Size = WindowInfo.SearchbarSize,
             TextScaled = true,
             Visible = not (WindowInfo.DisableSearch or false),
