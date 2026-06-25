@@ -8746,22 +8746,31 @@ function Library:CreateWindow(WindowInfo)
     end
 
     if Library.IsMobile then
-        local ToggleButton = Library:AddDraggableButton("rbxassetid://102639104920386", function()
+        local iconUrl = "rbxassetid://102639104920386" 
+        
+        if WindowInfo.Icon then
+            local iconStr = tostring(WindowInfo.Icon)
+            
+            if string.find(iconStr, "rbxassetid://") or string.find(iconStr, "http") then
+                iconUrl = iconStr
+            else
+                iconUrl = "rbxassetid://" .. iconStr
+            end
+        end
+
+        local ToggleButton = Library:AddDraggableButton(iconUrl, function()
             Library:Toggle()
         end, true)
 
         if WindowInfo.MobileButtonsSide == "Right" then
             ToggleButton.Button.Position = UDim2.new(1, -6, 0, 6)
             ToggleButton.Button.AnchorPoint = Vector2.new(1, 0)
-
-            else
-            end
+        end
 
         if WindowInfo.ShowMobileButtons == false then
             ToggleButton.Button.Visible = false
         end
     end
-
     --// Execution \\--
     SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         Library:UpdateSearch(SearchBox.Text)
