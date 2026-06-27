@@ -4831,8 +4831,6 @@ do
             )
         end
 
-        -- Dropdowns cant currently use corner radius since the button is supposed to be connected with the menu
-        -- This can be done properly without some random frames and overlaying textlabel over the button after Roblox adds UICorner with specific corner radiuses
 
         local ArrowImage = New("ImageLabel", {
             AnchorPoint = Vector2.new(1, 0.5),
@@ -6627,7 +6625,7 @@ function Library:CreateWindow(WindowInfo)
 
         SearchBox = New("TextBox", {
             BackgroundColor3 = "MainColor",
-            PlaceholderText = "Search - VDT library",
+            PlaceholderText = "Search - VDT Library",
             Size = WindowInfo.SearchbarSize,
             TextScaled = true,
             Visible = not (WindowInfo.DisableSearch or false),
@@ -7348,7 +7346,6 @@ function Library:CreateWindow(WindowInfo)
                     Parent = GroupboxLabel,
                 })
 
-                -- Tombol Panah untuk Dropdown
                 local ArrowIcon = Library:GetIcon("chevron-up")
                 CollapseButton = New("ImageButton", {
                     BackgroundTransparency = 1,
@@ -7833,31 +7830,31 @@ function Library:CreateWindow(WindowInfo)
         return Tab
     end
 
-    function Window:AddKeyTab(...)
+        function Window:AddKeyTab(...)
         local Name = nil
         local Icon = nil
         local Description = nil
 
         if select("#", ...) == 1 and typeof(...) == "table" then
             local Info = select(1, ...)
-            Name = Info.Name or "Tab"
+            Name = Info.Name or "Key"
             Icon = Info.Icon
             Description = Info.Description
         else
-            Name = select(1, ...) or "Tab"
+            Name = select(1, ...) or "Key"
             Icon = select(2, ...)
             Description = select(3, ...)
         end
 
         Icon = Icon or "key"
 
-        local TabButton: TextButton
+        local TabButton
         local TabLabel
         local TabIcon
-
         local TabContainer
 
         Icon = if Icon == "key" then KeyIcon else Library:GetCustomIcon(Icon)
+        
         do
             TabButton = New("TextButton", {
                 BackgroundColor3 = "MainColor",
@@ -7899,13 +7896,8 @@ function Library:CreateWindow(WindowInfo)
                 })
             end
 
-            table.insert(Library.TabButtons, {
-                Label = TabLabel,
-                Padding = ButtonPadding,
-                Icon = TabIcon,
-            })
+            table.insert(Library.TabButtons, { Label = TabLabel, Padding = ButtonPadding, Icon = TabIcon })
 
-            --// Tab Container \\--
             TabContainer = New("ScrollingFrame", {
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
@@ -7915,190 +7907,167 @@ function Library:CreateWindow(WindowInfo)
                 Visible = false,
                 Parent = Container,
             })
+            
             New("UIListLayout", {
                 HorizontalAlignment = Enum.HorizontalAlignment.Center,
-                Padding = UDim.new(0, 8),
-                VerticalAlignment = Enum.VerticalAlignment.Center,
+                VerticalAlignment = Enum.VerticalAlignment.Top,
+                Padding = UDim.new(0, 0),
                 Parent = TabContainer,
             })
+
             New("UIPadding", {
-                PaddingLeft = UDim.new(0, 1),
-                PaddingRight = UDim.new(0, 1),
+                PaddingTop = UDim.new(0, 20),
+                PaddingBottom = UDim.new(0, 20),
                 Parent = TabContainer,
             })
+
         end
 
-        --// Tab Table \\--
         local Tab = {
             Elements = {},
             Description = Description,
             IsKeyTab = true,
+            Container = TabContainer,
         }
 
-        function Tab:AddKeyBox(Callback)
-            assert(typeof(Callback) == "function", "Callback must be a function")
+function Tab:SetupKeySystem(Info)
+    local VerifyCallback = Info.Callback or function() end
+    local GetKeyCallback = Info.GetKeyCallback
+    
+    local KeyCard = New("Frame", {
+        BackgroundColor3 = "BackgroundColor",
+        Size = UDim2.new(0, 320, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        Parent = TabContainer,
+    })
+    table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = KeyCard }))
+    Library:AddOutline(KeyCard)
 
-            local Holder = New("Frame", {
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0.75, 0, 0, 21),
-                Parent = TabContainer,
-            })
+    New("UIPadding", {
+        PaddingBottom = UDim.new(0, 14), PaddingLeft = UDim.new(0, 14),
+        PaddingRight = UDim.new(0, 14), PaddingTop = UDim.new(0, 14),
+        Parent = KeyCard,
+    })
+    New("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = KeyCard })
 
-            local Box = New("TextBox", {
-                BackgroundColor3 = "MainColor",
-                PlaceholderText = "Key",
-                Size = UDim2.new(1, -71, 1, 0),
-                TextSize = 14,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = Holder,
-            })
-            New("UIPadding", {
-                PaddingLeft = UDim.new(0, 8),
-                PaddingRight = UDim.new(0, 8),
-                Parent = Box,
-            })
-            New("UIStroke", {
-                Color = "OutlineColor",
-                Parent = Box,
-            })
-            table.insert(
-                Library.Corners,
-                New("UICorner", {
-                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
-                    Parent = Box,
-                })
-            )
+    local HeaderFrame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), LayoutOrder = 1, Parent = KeyCard })
+    local HeaderIcon = Library:GetCustomIcon("lock") or {Url = "rbxassetid://102639104920386", ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.new(100, 100)}
+    
+    New("ImageLabel", { 
+        BackgroundTransparency = 1, Image = HeaderIcon.Url, ImageRectOffset = HeaderIcon.ImageRectOffset or Vector2.zero, 
+        ImageRectSize = HeaderIcon.ImageRectSize or Vector2.new(100, 100), ImageColor3 = Library.Scheme.AccentColor, 
+        Size = UDim2.fromOffset(20, 20), Parent = HeaderFrame 
+    })
+    New("TextLabel", { 
+        BackgroundTransparency = 1, Position = UDim2.fromOffset(28, 0), Size = UDim2.new(1, -28, 1, 0), 
+        Text = Info.Title or "Authentication", TextSize = 16, TextXAlignment = Enum.TextXAlignment.Left, Parent = HeaderFrame 
+    })
 
-            local Button = New("TextButton", {
-                AnchorPoint = Vector2.new(1, 0),
-                BackgroundColor3 = "MainColor",
-                Position = UDim2.fromScale(1, 0),
-                Size = UDim2.new(0, 63, 1, 0),
-                Text = "Execute",
-                TextSize = 14,
-                Parent = Holder,
-            })
-            New("UIStroke", {
-                Color = "OutlineColor",
-                Parent = Button,
-            })
-            table.insert(
-                Library.Corners,
-                New("UICorner", {
-                    CornerRadius = UDim.new(0, Library.CornerRadius / 2),
-                    Parent = Button,
-                })
-            )
+    local DescLabel = New("TextLabel", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 14), Text = Info.Description or "", TextSize = 13, TextTransparency = 0.4, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, Parent = KeyCard })
 
-            Button.InputBegan:Connect(function(Input)
-                if not IsClickInput(Input) then
-                    return
-                end
+    local InputHolder = New("Frame", { BackgroundColor3 = "MainColor", Size = UDim2.new(1, 0, 0, 34), LayoutOrder = 3, Parent = KeyCard })
+    table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = InputHolder }))
+    New("UIStroke", { Color = "OutlineColor", Parent = InputHolder })
+    local KeyInput = New("TextBox", { BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -20, 1, 0), PlaceholderText = "Enter key...", Text = "", TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Parent = InputHolder })
 
-                if not Library:MouseIsOverFrame(Button, Input.Position) then
-                    return
-                end
+    local function AddPremiumButton(Text, ParentObj, Color, LayoutOrderNum, Callback)
+        local Btn = New("TextButton", {
+            BackgroundColor3 = Color,
+            Size = UDim2.new(0, 0, 0, 28),
+            AutomaticSize = Enum.AutomaticSize.X,
+            Text = "  " .. Text .. "  ",
+            TextSize = 12,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            AutoButtonColor = false,
+            LayoutOrder = LayoutOrderNum,
+            Parent = ParentObj
+        })
+        New("UIPadding", { PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10), Parent = Btn })
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = Btn }))
+        New("UIStroke", { Color = "OutlineColor", Transparency = 0.5, Parent = Btn })
+        
+        Btn.MouseEnter:Connect(function() TweenService:Create(Btn, Library.TweenInfo, {BackgroundColor3 = Library:GetBetterColor(Color, 15)}):Play() end)
+        Btn.MouseLeave:Connect(function() TweenService:Create(Btn, Library.TweenInfo, {BackgroundColor3 = Color}):Play() end)
+        Btn.MouseButton1Click:Connect(Callback)
+    end
 
-                Callback(Box.Text)
-            end)
-        end
+    local ActionRow = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30), LayoutOrder = 4, Parent = KeyCard })
+    New("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 8), HorizontalAlignment = Enum.HorizontalAlignment.Center, Parent = ActionRow })
+    
+    if GetKeyCallback then AddPremiumButton("Get Key", ActionRow, Library.Scheme.MainColor, 1, GetKeyCallback) end
+    AddPremiumButton("Verify Key", ActionRow, Library.Scheme.AccentColor, 2, function() Library:SafeCallback(VerifyCallback, KeyInput.Text, DescLabel) end)
+
+    if Info.HWIDReset and Info.HWIDReset.Enabled then
+        New("Frame", { BackgroundColor3 = "OutlineColor", BackgroundTransparency = 0.5, Size = UDim2.new(1, 0, 0, 1), LayoutOrder = 5, Parent = KeyCard })
+        
+        local HWIDHolder = New("Frame", { BackgroundColor3 = "MainColor", Size = UDim2.new(1, 0, 0, 32), LayoutOrder = 6, Parent = KeyCard })
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = HWIDHolder }))
+        New("UIStroke", { Color = "OutlineColor", Parent = HWIDHolder })
+        local HWIDInput = New("TextBox", { BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -20, 1, 0), PlaceholderText = "Paste HWID Key...", Text = "", TextSize = 13, Parent = HWIDHolder })
+        
+        local ResetBtnWrapper = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30), LayoutOrder = 7, Parent = KeyCard })
+        New("UIListLayout", { HorizontalAlignment = Enum.HorizontalAlignment.Center, Parent = ResetBtnWrapper })
+        
+        AddPremiumButton(Info.HWIDReset.ButtonText or "Reset HWID", ResetBtnWrapper, Library.Scheme.MainColor, 1, function() 
+            if Info.HWIDReset.Callback then Info.HWIDReset.Callback(HWIDInput.Text) end
+        end)
+    end
+
+    return KeyInput
+end
 
         function Tab:RefreshSides() end
         function Tab:Resize() end
         function Tab:UpdateCorners() end
 
         function Tab:Hover(Hovering)
-            if Library.ActiveTab == Tab then
-                return
-            end
-
-            TweenService:Create(TabLabel, Library.TweenInfo, {
-                TextTransparency = Hovering and 0.25 or 0.5,
-            }):Play()
-            if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
-                    ImageTransparency = Hovering and 0.25 or 0.5,
-                }):Play()
-            end
+            if Library.ActiveTab == Tab then return end
+            TweenService:Create(TabLabel, Library.TweenInfo, { TextTransparency = Hovering and 0.25 or 0.5 }):Play()
+            if TabIcon then TweenService:Create(TabIcon, Library.TweenInfo, { ImageTransparency = Hovering and 0.25 or 0.5 }):Play() end
         end
 
-                function Tab:Show()
-            if Library.ActiveTab then
-                Library.ActiveTab:Hide()
-            end
+        function Tab:Show()
+            if Library.ActiveTab then Library.ActiveTab:Hide() end
 
             TweenService:Create(TabButton, Library.TweenInfo, { BackgroundTransparency = 0 }):Play()
             TweenService:Create(TabLabel, Library.TweenInfo, { TextTransparency = 0 }):Play()
-            if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, { ImageTransparency = 0 }):Play()
-            end
-
-            if Description then
-                Window:ShowTabInfo(Name, Description)
-            end
-
+            if TabIcon then TweenService:Create(TabIcon, Library.TweenInfo, { ImageTransparency = 0 }):Play() end
+            
+            TabContainer.Position = UDim2.new(0, 0, 0, 15)
             TabContainer.Visible = true
-            Tab:RefreshSides()
+            TweenService:Create(TabContainer, Library.TweenInfo, { Position = UDim2.new(0, 0, 0, 0) }):Play()
+
+            if Description then Window:ShowTabInfo(Name, Description) end
             Library.ActiveTab = Tab
-
-            if Library.Searching then
-                Library:UpdateSearch(Library.SearchText)
-            end
-
-            TabContainer.Position = UDim2.new(0, 0, 0, 15) 
-            TweenService:Create(TabContainer, Library.TweenInfo, {
-                Position = UDim2.new(0, 0, 0, 0)
-            }):Play()
+            if Library.Searching then Library:UpdateSearch(Library.SearchText) end
         end
 
-
         function Tab:Hide()
-            TweenService:Create(TabButton, Library.TweenInfo, {
-                BackgroundTransparency = 1,
-            }):Play()
-            TweenService:Create(TabLabel, Library.TweenInfo, {
-                TextTransparency = 0.5,
-            }):Play()
-            if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
-                    ImageTransparency = 0.5,
-                }):Play()
-            end
+            TweenService:Create(TabButton, Library.TweenInfo, { BackgroundTransparency = 1 }):Play()
+            TweenService:Create(TabLabel, Library.TweenInfo, { TextTransparency = 0.5 }):Play()
+            if TabIcon then TweenService:Create(TabIcon, Library.TweenInfo, { ImageTransparency = 0.5 }):Play() end
             TabContainer.Visible = false
-
             Window:HideTabInfo()
-
             Library.ActiveTab = nil
         end
 
         function Tab:SetVisible(Visible: boolean)
             TabButton.Visible = Visible
-
-            if not Visible and Library.ActiveTab == Tab then
-                Tab:Hide()
-            end
+            if not Visible and Library.ActiveTab == Tab then Tab:Hide() end
         end
 
-        --// Execution \\--
-        if not Library.ActiveTab then
-            Tab:Show()
-        end
+        if not Library.ActiveTab then Tab:Show() end
 
-        TabButton.MouseEnter:Connect(function()
-            Tab:Hover(true)
-        end)
-        TabButton.MouseLeave:Connect(function()
-            Tab:Hover(false)
-        end)
+        TabButton.MouseEnter:Connect(function() Tab:Hover(true) end)
+        TabButton.MouseLeave:Connect(function() Tab:Hover(false) end)
         TabButton.MouseButton1Click:Connect(Tab.Show)
 
-        Tab.Container = TabContainer
         setmetatable(Tab, BaseGroupbox)
-
         Library.Tabs[Name] = Tab
 
         return Tab
     end
+
 
     function Window:AddDialog(Idx, Info)
         Info = Library:Validate(Info, Templates.Dialog)
@@ -8567,50 +8536,24 @@ function Library:CreateWindow(WindowInfo)
         return Dialog
     end
 
-        function Window:Toggle(Value: boolean?)
+    function Window:Toggle(Value: boolean?)
         if Library.ActiveLoading then
-            if Value == true then return end
-            if not Library.Toggled then return end
+            if Value == true then
+                return
+            end
+
+            if not Library.Toggled then
+                return
+            end
         end
 
-        local NewState = typeof(Value) == "boolean" and Value or not Library.Toggled
-        if Library.Toggled == NewState then return end 
-        
-        Library.Toggled = NewState
-
-        local WindowScale = MainFrame:FindFirstChildOfClass("UIScale")
-        
-        local OpenTween = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-        local CloseTween = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-
-        if Library.Toggled then
-            if WindowScale then
-                WindowScale.Scale = 0.01
-                MainFrame.Visible = true
-                TweenService:Create(WindowScale, OpenTween, {
-                    Scale = 1 * Library.DPIScale
-                }):Play()
-            else
-                MainFrame.Visible = true
-            end
+        if typeof(Value) == "boolean" then
+            Library.Toggled = Value
         else
-            if WindowScale then
-                local TweenAnim = TweenService:Create(WindowScale, CloseTween, {
-                    Scale = 0.01
-                })
-                TweenAnim:Play()
-                
-                local Connection
-                Connection = TweenAnim.Completed:Connect(function()
-                    Connection:Disconnect()
-                    if not Library.Toggled then 
-                        MainFrame.Visible = false
-                    end
-                end)
-            else
-                MainFrame.Visible = false
-            end
+            Library.Toggled = not Library.Toggled
         end
+
+        MainFrame.Visible = Library.Toggled
 
         if WindowInfo.UnlockMouseWhileOpen then
             ModalElement.Modal = Library.Toggled
@@ -8771,6 +8714,8 @@ function Library:CreateWindow(WindowInfo)
             ToggleButton.Button.Visible = false
         end
     end
+
+
     --// Execution \\--
     SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         Library:UpdateSearch(SearchBox.Text)
@@ -9341,7 +9286,7 @@ function Library:CreateLoading(LoadingInfo)
             + 15                        -- Padding between Label and Buttons
             + (HasButtons and 48 or 0)  -- Buttons Area
 
-        Loading.WindowErrorHeight = RequiredHeight -- math.max(Loading.WindowHeight, RequiredHeight)
+        Loading.WindowErrorHeight = RequiredHeight
     end
 
     function Loading:SetErrorMessage(Text)
