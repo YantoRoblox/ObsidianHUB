@@ -7951,7 +7951,7 @@ function Tab:SetupKeySystem(Info)
     New("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = KeyCard })
 
     local HeaderFrame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), LayoutOrder = 1, Parent = KeyCard })
-    local HeaderIcon = Library:GetCustomIcon("lock") or {Url = "rbxassetid://102639104920386", ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.new(100, 100)}
+    local HeaderIcon = Library:GetCustomIcon("lock") or {Url = "rbxassetid://94583016479637", ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.new(100, 100)}
     
     New("ImageLabel", { 
         BackgroundTransparency = 1, Image = HeaderIcon.Url, ImageRectOffset = HeaderIcon.ImageRectOffset or Vector2.zero, 
@@ -8689,7 +8689,7 @@ end
     end
 
     if Library.IsMobile then
-        local iconUrl = "rbxassetid://102639104920386" 
+        local iconUrl = "rbxassetid://94583016479637" 
         
         if WindowInfo.Icon then
             local iconStr = tostring(WindowInfo.Icon)
